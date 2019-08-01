@@ -1,0 +1,241 @@
+{% extends 'blog_base.html' %}
+{% load filter_tag %}
+
+
+{% block title %}
+    用户信息
+{% endblock %}
+
+{% block content %}
+    <div id="ctr" class="container">
+        <div class="col-xs-4 bg-info">
+            <center>
+                <div class="center">
+                    <h3>
+                        <div style="display: inline-block; margin-right: 10px">
+                            <img class="img-circle" height="50px" width="50px"
+                                 src="/static/media/{{ user.head_img }}" alt="">
+                        </div>
+                        <span>{{ user.nickname }}</span>
+                        {% if change_info_flag %}
+                            <a href="javascript:hidden_previous_info()" style="font-size: 15px" id="change_btn">修改信息</a>
+                        {% endif %}
+                    </h3>
+
+                </div>
+            </center>
+            <div id="previous_info" style="padding: 10px">
+                <!-- 显示用户信息 -->
+
+                <div>
+                    <hr>
+                    总文章数： <a href="#" style="color: red;">{{ user.article_set.count }}</a>
+                </div>
+                <br>
+                <div>
+                    <ul>
+                        <li>生日：<span id="birthday">{{ user.userinfo.birthday }}</span></li>
+                        <br><br>
+                        <li>地址：
+                            <span id="country">{{ user.userinfo.get_country_display }}</span>
+                        </li>
+                        <li>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <span id="address">{{ user.userinfo.address }}</span>
+                        </li>
+                        <br>
+                        <br>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="bg-info" id="info_form" style="padding: 10px" hidden>
+                <label for="birthday">
+                    出生年月：
+                </label>
+                <input type="date" name="birthday" class="form-control" style="width: 170px;display: inline-block"
+                       required value="2019-05-09">
+                <br>
+                <br>
+                <label for="country">
+                    国家：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </label>
+                <select name="country" id="" class="form-control" style="width: 170px;display: inline-block">
+
+                    <option value="0" {% if user.userinfo.country == 0 %}selected{% endif %}>中华人民共和国</option>
+                    <option value="1" {% if user.userinfo.country == 1 %}selected{% endif %}>海外</option>
+                </select>
+                <br>
+                <br>
+                <label for="address">
+                    地址：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                </label>
+                <input type="text" name="address" class="form-control" style="width: 270px;display: inline-block"
+                       placeholder="地址" value="{{ user.userinfo.address }}" required>
+                <br>
+                <br>
+
+                <div style="display: inline-block;">
+                    <button onclick="save_info()" class="btn btn-success" style="margin-left: 50px">保存</button>
+                </div>
+                <div style="display: inline-block;">
+                    <button onclick="display_previous_info()" class="btn btn-default" style="margin-left: 50px">取消
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-7">
+            <div>
+                <!-- 显示用户最近文章 -->
+                {% for article in page_object.object_list %}
+                    <div class="col-xs-12 art {% get_random_color %}" style="padding-top: 10px">
+                        <h4>
+                            <a href="{% url 'article:article_detail' article.author.username article.id %}">{{ article.title }}</a>
+                        </h4>
+                        <p>{{ article.content|truncatechars:'60' }}</p>
+                        <div>
+                            <span>✺</span>
+                            <span><a href="#" style="line-height: 24px">{{ article.category.chinese_name }}</a></span>
+                            <span>✺</span>
+                            <span style="line-height: 24px">{{ article.create_time }}</span><br><br>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <center>
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+
+                            {% if page_object.has_previous %}
+                                <li>
+                                    <a href="{% url 'user:display_user_info' username %}?page=1">
+                                        <span aria-hidden="true">第一页</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+
+                            {#                    中间的页数#}
+                            {% for index in display_page %}
+                                {% if index == page_object.number %}
+                                    <li class="active"><a href="javascript:">{{ index }}</a></li>
+                                {% else %}
+                                    <li>
+                                        <a href="{% url 'user:display_user_info' username %}?page={{ index }}">{{ index }}</a>
+                                    </li>
+                                {% endif %}
+
+                            {% endfor %}
+
+
+
+                            {% if page_object.has_next %}
+                                <li>
+                                    <a href="{% url 'user:display_user_info' username %}?page={{ total_page_count }}">
+                                        <span aria-hidden="true">最后一页</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+
+
+                            <li class="disabled">
+                                <a href="javascript:">
+                                    <span aria-hidden="true">{{ page_object.number }}/{{ page_object.paginator.num_pages }}</span>
+                                </a>
+                            </li>
+
+
+                        </ul>
+                    </nav>
+                </center>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block jsblock %}
+
+    <script>
+
+        let birthday = "{{ user.userinfo.birthday }}";
+        let country = "{{ user.userinfo.country }}";
+        let address = "{{ user.userinfo.address }}";
+
+        let birthday_input = $('input[name="birthday"]');
+        let country_input = $('select[name="country"]');
+        let address_input = $('input[name="address"]');
+        address_input.value = address;
+        console.log(address_input);
+
+        let previous_info = $('#previous_info');
+        let info_form = $('#info_form');
+        let change_btn = $('#change_btn');
+
+        function hidden_previous_info() {
+            previous_info.hide();
+            info_form.show();
+            change_btn.hide();
+        }
+
+        function display_previous_info() {
+            previous_info.show();
+            change_btn.show();
+            info_form.hide()
+        }
+
+        function save_info() {
+            console.log(birthday, country);
+            $.ajax({
+                url: "{% url 'user:display_user_info' user.username %}",
+                method: "POST",
+                headers: {
+                    'X-CSRFToken': "{{ csrf_token }}"
+                },
+                data: {
+                    'birthday': birthday_input.val(),
+                    'country': country_input.val(),
+                    'address': address_input.val(),
+                },
+                success: function (data) {
+
+                    if (data['code'] === 'yes') {
+                        display_previous_info();
+                        {#alert(data['data']['birthday']);#}
+                        birthday = data['data']['birthday'];
+                        country = country_input.val();
+                        address = address_input.val();
+                        change_previous_info();
+                    } else {
+                        let error = data['error'];
+                        let msg = "";
+                        for (let key in error) {
+                            msg += "属性：" + key + ",值：" + error[key] + "\n";
+                        }
+                        alert(msg);
+                    }
+                },
+                error: function () {
+                    alert('错误')
+                }
+            })
+        }
+
+        function change_previous_info() {
+            let b = $('#birthday');
+            let c = $('#country');
+            let a = $('#address');
+            console.log(birthday, country, address);
+            if (country === '0') {
+                c.html('中华人民共和国');
+            } else {
+                c.html('海外');
+            }
+            b.html(birthday);
+            a.html(address);
+        }
+
+    </script>
+
+{% endblock %}

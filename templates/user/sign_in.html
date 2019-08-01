@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    登陆
+{% endblock %}
+
+
+{% block body %}
+    <div class="container">
+        <h1><a href="{% url 'blog:index' %}" style="font-family: 华文行楷">回到博客首页</a></h1>
+    </div>
+    <div class="container" style="max-width: 330px">
+        <div style="height: 20px">
+            <hr>
+{#            提示错误信息#}
+            <span style="color: red;">{{ error }}</span>
+        </div>
+        <form class="form-signin" action="{% url 'user:user_sign_in' %}" method="post">
+{#            防止csrf工具#}
+            {% csrf_token %}
+            <center><h2 class="form-signin-heading" style="font-family: 楷体">登录</h2></center>
+            <hr>
+            <hr>
+            {{ form.username }}
+            <hr>
+            {{ form.password }}
+            <hr>
+{#            判断验证码是否匹配正确#}
+            <input type="text" name="v_code" class="form-control" style="width: 170px;display: inline-block"
+                   placeholder="验证码" required>
+            <img src="{% url 'user:generate_v_code' %}" alt="验证码加载失败" onclick="v_code_click(this)">
+            {{ vcerror }}
+            <hr>
+{#            跳转至注册页面#}
+            <p><a href="{% url 'user:user_sign_up' %}">没有帐号，立即注册</a></p>
+            <hr>
+            <button class="btn btn-lg btn-primary btn-block" type="submit" style="font-family: 楷体">登录</button>
+        </form>
+
+
+    </div>
+{% endblock %}
+
+{% block jsblock %}
+
+    <script>
+        function v_code_click(img) {
+            {#鼠标点击事件：刷新验证码#}
+            img.src = '{% url "user:generate_v_code" %}?' + Math.random()
+        }
+    </script>
+
+{% endblock %}

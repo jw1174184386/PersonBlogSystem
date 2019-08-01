@@ -1,0 +1,200 @@
+{% extends 'blog_base.html' %}
+
+{% block title %}
+    {{ article.title }}
+{% endblock %}
+
+{% block body %}
+    <div>
+    {% comment %}
+        文章详情页展示，包含导航条，文章正文显示，分页显示
+    {% endcomment %}
+        {% include 'nav.html' %}
+
+    </div>
+
+    <div style="margin-left: 20px; position:fixed; z-index: 100">
+        <a href="javascript:display()">显示/隐藏</a>
+    </div>
+
+    <div id="ctr" class="container-fluid">
+        <div id="user" class="col-xs-4" style="display: none">
+            <div class=" text-center">
+                <img class="img-circle" style="width: 48px;height: 48px"
+                     src="/static/media/{{ article.author.head_img }}" alt="">
+                <a href="{% url 'user:display_user_info' article.author.username %}"
+                   class="name">{{ article.author.nickname }}</a><br>
+            </div>
+            <hr>
+            <h4>总文章：{{ article.author.article_set.count }}</h4>
+            <hr>
+            <h3>历史纪录---<a href="javascript:" onclick="clear_history()">清除历史纪录</a></h3>
+            <hr>
+            <ul id="history_list">
+                {% for history_time in history_time_list %}
+                    <li>
+                        <a href="{% url 'article:article_detail' history_time.0.author.username history_time.0.id %}">
+                            {{ forloop.counter }}、{{ history_time.0.title|truncatechars:'30' }}
+                        </a>
+                        <hr>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+
+        <div class="col-xs-11" style="border-left: 1px #cccccc solid" id="content">
+
+            <div style="position: fixed; margin-left: 1250px; margin-top: 300px">
+                <a href="#">回到顶部</a>
+            </div>
+
+            <span style="color: #ca0c16;">{{ article.get_sourcetype_display }}</span>
+            <h3>{{ article.title }}</h3>
+            <hr>
+            {{ content|safe }}
+            <hr>
+            <div>
+                <h2>共有 <span style="color: dodgerblue;">{{ total_comment_count }}</span> 条评论</h2>
+            </div>
+
+            <div id="comment_list">
+                {% for comment in comment_list %}
+                    <div>
+                        <div>{{ forloop.counter }}楼</div>
+                        <div style="display: inline-block;margin-right: 20px">
+
+                            <img src="/static/media/{{ comment.user.head_img }}" style="width: 48px;height: 48px">
+
+
+                        </div>
+                        <div style="display: inline-block;">
+                            {{ comment.content|safe }}
+                        </div>
+                        <div>
+                            <div style="display: inline-block;">
+                                <a href="{% url 'user:display_user_info' comment.user.username %}">{{ comment.user.nickname }}</a>
+
+                            </div>
+                            <div style="display: inline-block; margin-left: 20px;">
+                                <span>{{ comment.create_time }}</span>
+                            </div>
+                        </div>
+
+                        <hr>
+                    </div>
+                {% endfor %}
+            </div>
+            <div>
+                <center><a href="javascript:get_more_comment()">点击查看更多</a></center>
+                <hr>
+            </div>
+            {{ comment_form.media }}
+            {% if request.session.user %}
+                {{ comment_form.content }}
+                <br>
+                <button id="comment_it" class="comment_button">回复</button>
+                <hr>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block jsblock %}
+    {{ block.super }}
+    <script>
+        var comment_offset = 5;
+        var article_id = {{ article.id }};
+        var comment_list_element = $('#comment_list');
+
+        function display() {
+            $user = $('#user');
+            $content = $('#content');
+            if ($user.css('display') === 'block') {
+                $user.css('display', 'none');
+                $content.attr('class', 'col-xs-11');
+
+            } else {
+                $user.css('display', 'block');
+                $content.attr('class', 'col-xs-8');
+            }
+        }
+
+        $('#comment_it').click(function () {
+            let comment_frame = document.getElementsByTagName('iframe');
+            content = comment_frame[0].contentWindow.document.body.innerHTML;
+            console.log(content);
+            if (content !== '<p><br></p>') {
+
+                $.ajax({
+                    url: "{% url 'article:user_comment' article.id %}",
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                    },
+                    data: {
+                        'content': content,
+                        'article_id':{{ article.pk }},
+                    },
+                    success: function (data) {
+                        console.log(data);
+                        if (data['code'] === 'ok') {
+                            let comment_element = document.createElement('div');
+                            comment_element.innerHTML = data['data'];
+                            comment_list_element[0].appendChild(comment_element);
+
+                        }
+                    },
+                    error: function () {
+                        alert('网络连接失败，请重试。')
+                    }
+                })
+            } else {
+                alert('输入不能为空')
+            }
+        });
+
+        function get_more_comment() {
+            $.ajax({
+                url: "{% url 'article:get_next_page_comment' %}",
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+                data: {
+                    'comment_offset': comment_offset,
+                    'article_id': article_id,
+                },
+                success: function (data) {
+                    if (data['code'] === 'ok') {
+                        if (!data['data']) {
+                            alert('没有更多数据了！')
+                        }
+                        let comment_element = document.createElement('div');
+                        comment_element.innerHTML = data['data'];
+                        comment_list_element[0].appendChild(comment_element);
+                        comment_offset += data['count'];
+                        console.log('offset:', comment_offset)
+                    } else {
+                        alert('错误！')
+                    }
+                },
+                error: function (data) {
+                    alert('错误！')
+                }
+            });
+        }
+
+    </script>
+{% endblock %}
+
+{% block cssblock %}
+    <style>
+        .headimg {
+            padding-bottom: 12px;
+            font-size: 24px;
+            border-bottom: 1px solid #ececec;
+            font-weight: bold;
+        }
+    </style>
+{% endblock %}

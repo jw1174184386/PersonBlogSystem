@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+    注册
+{% endblock %}
+
+
+{% block body %}
+
+    <div class="container">
+        <h1><a href="{% url 'blog:index' %}" style="font-family: 华文行楷">回到博客首页</a></h1>
+    </div>
+
+    <div class="container" style="max-width: 330px">
+
+        <form action="{% url 'user:user_sign_up' %}" method="post" enctype="multipart/form-data">
+            <center><h2 class="form-signin-heading" style='font-family: 楷体'>快注册吧！</h2></center>
+            {% csrf_token %}
+
+            <label for="inputPassword" class="sr-only">用户名</label>
+            {{ form.username }}<span style="color: red;">{{ form.errors.username }}</span><br>
+            <label for="inputPassword" class="sr-only">密码</label>
+            {{ form.password }}<br>
+            <label for="inputPassword" class="sr-only">重复密码</label>
+            <input class="form-control" type="password" name="replace_password" placeholder="重复密码" required><br>
+            <span style="color: red;">
+                {{ form.errors.password }}
+            </span>
+            <label for="inputNickName" class="sr-only">用户名</label>
+            {{ form.nickname }}<span style="color: red;">{{ form.errors.nickname }}</span><br>
+
+            {{ form.head_img }}<br>
+            <p><a href="{% url 'user:user_sign_in' %}">已有帐号，马上登陆</a></p>
+            <hr>
+            <button class="btn btn-lg btn-primary btn-block" type="submit" style="font-family: 华文行楷">立即注册</button>
+
+        </form>
+    </div>
+{% endblock %}

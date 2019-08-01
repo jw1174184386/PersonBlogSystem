@@ -1,0 +1,52 @@
+{% load cache %}
+    <nav class="navbar navbar-default">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">风城浪子</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav">
+                <li><a href="/">主页</a></li>
+                {% for tool in tool_bar %}
+                    <li><a href="{{ tool.url }}" target="_blank">{{ tool.tool_name }}</a></li>
+                {% endfor %}
+
+            </ul>
+
+            <ul class="nav navbar-nav navbar-right">
+                {% if request.session.user.nickname %}
+                    <li><a href="{% url 'article:article_publish' request.session.user.username %}" style="color: green;border: 1px solid;">发表文章</a></li>
+{#                    <h3>{{ request.session }}</h3>#}
+                    <li><a href="#" class="navbar-right"><span
+                            style="color: #d43f3a"><a href="{% url 'user:display_user_info' request.session.user.username %}">{{ request.session.user.nickname }}</a></span></a></li>
+                    <li><a href="{% url 'user:user_sign_out' %}">退出</a></li>
+                {% else %}
+
+                    <li><a href="{% url 'user:user_sign_in' %}" class="navbar-right">登陆</a></li>
+                    <li><a href="{% url 'user:user_sign_up' %}" class="navbar-right">注册</a></li>
+
+                {% endif %}
+
+            </ul>
+
+
+            <form action="{% url 'article:search' %}" method="get" target="_blank"
+                  class="navbar-form hidden-md hidden-sm hidden-xs navbar-right">
+                <div class="form-group">
+                    <input type="text" class="form-control" placeholder="搜索本站" name="wd" value="{{ keyword }}" required>
+                </div>
+                <button type="submit" class="btn btn-default">搜索</button>
+            </form>
+        </div>
+    </div>
+</nav>

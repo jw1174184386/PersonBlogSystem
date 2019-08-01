@@ -1,0 +1,165 @@
+{% extends 'blog_base.html' %}
+{% load static %}
+{% load cache %}
+{% block title %}
+
+{% endblock %}
+
+{% cache 200 menu %}
+    {% block menu %}
+        <div id="menu" class="list-group col-xs-2" style="">
+            {% if category_name %}
+                <a href="/" class="list-group-item">推荐</a>
+            {% else %}
+                <a href="/" class="list-group-item active">推荐</a>
+            {% endif %}
+
+            {% for category in category_list %}
+                {% if category_name == category.foreign_name %}
+                    <a href="#"
+                       class="list-group-item active">{{ category.chinese_name }}</a>
+                {% else %}
+                    <a href="{% url 'article:change_category' category.foreign_name %}"
+                       class="list-group-item">{{ category.chinese_name }}</a>
+                {% endif %}
+
+            {% endfor %}
+
+        </div>
+    {% endblock %}
+{% endcache %}
+
+{% block mcontent %}
+
+    {#    轮播图#}
+    <div id="banner" class="col-xs-12">
+        <div class="col-xs-6">
+            {% include 'banner.html' %}
+
+        </div>
+        <div class="cimg col-xs-3">
+            <div class="col-xs-12">
+                <a href="#" target="_blank"><img
+                        src="/static/media/{{ static_banner.0.img_url }}" alt=""></a>
+            </div>
+            <div class="col-xs-12">
+                <a href="#" target="_blank"><img
+                        src="/static/media/{{ static_banner.1.img_url }}" alt=""></a>
+            </div>
+
+        </div>
+       <div class="col-xs-2 advertise">
+            <img src="/static/media/84a5a29b169548f2b35d90c51b0113e3.gif" alt="">
+        </div>
+
+    </div>
+
+    {#    显示需要的文章#}
+    <div>
+        <div class="col-xs-8">
+            {% for article in page_object.object_list %}
+
+                <div class="col-xs-12 art">
+                    {% if forloop.counter == 1 %}
+                        <hr>
+                    {% endif %}
+                    <h4>
+                        <a href="{% url 'article:article_detail' article.author.username article.id %}">{{ article.title }}</a>
+                    </h4>
+                    <p>{{ article.content|truncatechars:'60' }}</p>
+                    <div>
+                        <span><img class="headimg img-circle" src="/static/media/{{ article.author.head_img }} "
+                                   alt=""></span>
+                        <span class="mleft"><a href="{% url 'user:display_user_info' article.author.username %}"
+                                               style="line-height: 24px;font-weight: bold">{{ article.author.nickname }}</a></span>
+                        <span>✺</span>
+                        <span><a href="{% url 'article:change_category' article.category.foreign_name %}"
+                                 style="line-height: 24px">{{ article.category.chinese_name }}</a></span>
+                        <span>✺</span>
+                        <span><span style="line-height: 24px">{{ article.create_time }}</span></span>
+                        <hr>
+                    </div>
+
+                </div>
+                <hr>
+                <hr>
+            {% endfor %}
+
+
+            {#            # 分页#}
+
+            <center>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+
+                        {% if page_object.has_previous %}
+                            <li>
+                                <a href="{% url 'article:change_category' category_name %}?page=1">
+                                    <span aria-hidden="true">第一页</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+
+                        {#                    中间的页数#}
+                        {% for index in display_page %}
+                            {% if index == page_object.number %}
+                                <li class="active"><a href="javascript:">{{ index }}</a></li>
+                            {% else %}
+                                <li>
+                                    <a href="{% url 'article:change_category' category_name %}?page={{ index }}">{{ index }}</a>
+                                </li>
+                            {% endif %}
+
+                        {% endfor %}
+
+
+
+                        {% if page_object.has_next %}
+                            <li>
+                                <a href="{% url 'article:change_category' category_name %}?page={{ total_page_count }}">
+                                    <span aria-hidden="true">最后一页</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+
+
+                        <li class="disabled">
+                            <a href="javascript:">
+                                <span aria-hidden="true">{{ page_object.number }}/{{ page_object.paginator.num_pages }}</span>
+                            </a>
+                        </li>
+
+
+                    </ul>
+                </nav>
+            </center>
+
+
+        </div>
+
+        <div class="col-xs-4">
+
+            <h3>历史纪录---<a href="javascript:" onclick="clear_history()">清除历史纪录</a></h3>
+            <hr>
+            <ul id="history_list">
+
+                {% for history_time in history_time_list %}
+                    <li>
+                        <a href="{% url 'article:article_detail' history_time.0.author.username history_time.0.id %}">
+                            {{ forloop.counter }}、{{ history_time.0.title|truncatechars:'30' }}
+                        </a>
+                        <hr>
+                    </li>
+                {% endfor %}
+            </ul>
+
+
+        </div>
+
+
+    </div>
+
+{% endblock %}
+

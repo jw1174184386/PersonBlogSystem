@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block cssblock %}
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        #ctr {
+            max-width: 1228px;
+            min-width: 1228px;
+        }
+
+        #menu {
+            width: 128px;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        #mcontent {
+            margin: 0;
+            padding: 0;
+        }
+
+        #carousel-example-generic {
+            width: 400px;
+            height: 224.96px;
+            margin: 0;
+            padding: 0;
+        }
+
+        .carousel-inner img {
+            width: 400px;
+            height: 225px;
+        }
+
+        .item img {
+            width: 400px;
+            height: 225px;
+        }
+
+        .cimg {
+            width: 250px;
+            position: relative;
+        {#left: 20px;#} margin: 0;
+            padding: 0;
+        }
+
+        .cimg img {
+            width: 200px;
+            height: 112.5px;
+            position: relative;
+            left: -80px;
+        }
+
+        .advertise img {
+            width: 400px;
+            height: 225px;
+            position: relative;
+            left: -125px;
+        }
+
+        .art {
+            margin-left: 20px;
+        }
+
+        .headimg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .headimgb {
+            width: 48px;
+            height: 48px;
+        }
+
+        li {
+            list-style: none;
+            float: left;
+        }
+
+        .m_left {
+            margin-left: 10px;
+        }
+
+        .name {
+            font-size: 20px;
+            line-height: 24px;
+            margin-left: 15px;
+        }
+
+        .comment_button {
+            background-color: #00b5e5;
+            text-align: center;
+            color: #ffffff;
+            width: 100px;
+            height: 40px;
+        }
+
+
+    </style>
+
+{% endblock %}
+
+<!-- 页面部分 -->
+{% block body %}
+
+    {% include 'nav.html' %}
+
+    {% block content %}
+        <div id="ctr" class="container">
+            <div id="menu" class="list-group col-xs-2">
+                {% block menu %}
+
+                {% endblock %}
+            </div>
+
+            <div id="main_content" class="col-xs-10">
+                {% block mcontent %}
+
+                {% endblock %}
+            </div>
+        </div>
+    {% endblock %}
+
+
+
+{% endblock %}
+
+
+
+{% block jsblock %}
+    <script>
+        $('.carousel').carousel({
+            interval: 3000
+        });
+
+        function clear_history() {
+            $.ajax({
+
+                url: '{% url "article:clear_history" %}',
+                data: {},
+                type: 'get',
+                success: function (data) {
+                    {#console.log(data)#}
+                    $('#history_list').html('')
+                }
+            })
+        }
+    </script>
+{% endblock %}

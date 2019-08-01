@@ -1,0 +1,128 @@
+{% extends 'blog_base.html' %}
+{% load static %}
+{% load filter_tag %}
+
+{% block title %}
+
+{% endblock %}
+
+
+{% block menu %}
+
+    <div id="menu" class="list-group col-xs-2">
+        <div id="menu" class="list-group col-xs-2" style="position: fixed;">
+            {% if category_name %}
+                <a href="/" class="list-group-item">推荐</a>
+            {% else %}
+                <a href="/" class="list-group-item active">推荐</a>
+            {% endif %}
+
+            {% for category in category_list %}
+                {% if category_name == category.foreign_name %}
+                    <a href="#"
+                       class="list-group-item active">{{ category.chinese_name }}</a>
+                {% else %}
+                    <a href="{% url 'article:change_category' category.foreign_name %}"
+                       class="list-group-item">{{ category.chinese_name }}</a>
+                {% endif %}
+
+            {% endfor %}
+
+        </div>
+
+        {% for category in categorys %}
+            {% if type == category.engname %}
+                <a href="#"
+                   class="list-group-item active">{{ category.cname }}</a>
+            {% else %}
+                <a href="#" class="list-group-item">{{ category.cname }}</a>
+            {% endif %}
+
+        {% endfor %}
+
+    </div>
+{% endblock %}
+
+
+{% block mcontent %}
+    {#    显示需要的文章#}
+    <div>
+        <div class="col-xs-12">
+            <hr>
+            <h3>关键字<font color="red">{{ keyword }}</font>的结果为：</h3>
+
+            {% for article in page_object.object_list %}
+
+                <div class="col-xs-12 art" style="height: 170px">
+                    {% if forloop.counter == 1 %}
+                        <hr>
+                    {% endif %}
+                    <h4>
+                        <a href="{% url 'article:article_detail' article.author.username article.id %}">{% keyword_to_red article.title keyword as t %}{{ t|safe }}</a>
+                    </h4>
+                    <p>{% keyword_to_red article.content keyword as c %}{{ c|truncatechars:'80'|safe}}</p>
+                    <div>
+                        <img class="headimg img-circle" src="/static/media/{{ article.author.head_img }} " alt="">
+
+                        <a href="{% url 'user:display_user_info' article.author.username %}"> {{ article.author.nickname }}</a>
+                        <span>✺</span>
+                        <a href="{% url 'article:change_category' article.category.foreign_name %}"
+                           style="line-height: 24px">{{ article.category.chinese_name }}</a>
+                        <span>✺</span>
+                        <span style="line-height: 24px">{{ article.create_time }}</span>
+                        <hr>
+                    </div>
+                </div>
+                <hr>
+                <hr>
+            {% endfor %}
+
+            <center>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        {% if page_object.has_previous %}
+
+                            <li>
+                                <a href="{% url 'article:search' %}?wd={{ keyword }}&page=1">
+                                    <span aria-hidden="true">第一页</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {#                    中间的页数#}
+                        {% for index in display_page %}
+                            {% if index == page_object.number %}
+                                <li class="active"><a href="javascript:">{{ index }}</a></li>
+                            {% else %}
+                                <li>
+                                    <a href="{% url 'article:search' %}?wd={{ keyword }}&page={{ index }}">{{ index }}</a>
+                                </li>
+                            {% endif %}
+
+                        {% endfor %}
+
+                        {% if page_object.has_next %}
+                            <li>
+                                <a href="{% url 'article:search' %}?wd={{ keyword }}&page={{ total_page_count }}">
+                                    <span aria-hidden="true">最后一页</span>
+                                </a>
+                            </li>
+                        {% endif %}
+
+
+                        <li class="disabled">
+                            <a href="javascript:">
+                                <span aria-hidden="true">{{ page_object.number }}/{{ page_object.paginator.num_pages }}</span>
+                            </a>
+                        </li>
+
+                    </ul>
+                </nav>
+            </center>
+        </div>
+
+    </div>
+
+
+
+{% endblock %}
