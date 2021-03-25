@@ -126,7 +126,7 @@ PyVirtualDisplay==0.2.1
 pywin32==224
 pywinauto==0.6.3
 pywinpty==0.5.5
-PyYAML==3.13
+PyYAML==5.4
 pyzmq==18.0.1
 qtconsole==4.4.3
 queuelib==1.5.0
